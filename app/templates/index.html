@@ -39,7 +39,7 @@
                     // Create a JSON payload with the base64 image data
                     const jsonData = {
                         image: base64Image ,
-                        filter:"canny"
+                        filter:"detection"
                     };
                     // Send the image to the server using Fetch API with async/await
                     const response = await fetch('/upload', {
