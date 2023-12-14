@@ -2,67 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Upload Example</title>
+    <title>Image Result</title>
 </head>
 <body>
-    <!-- Input field for image upload -->
-    <label for="imageUpload">Select an image:</label>
-    <input type="file" id="imageUpload" accept="image/*">
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="sendRequest()">Send Request</button>
 
-    <!-- Display the selected image -->
-    <img id="selectedImage" src="#" alt="Selected Image">
+    <h2>Original Image</h2>
+    <img id="originalImage" alt="Original Image" width="500">
+    
+    <h2>Processed Image</h2>
+    <img id="processedImage" alt="Processed Image" width="500">
 
-    <!-- Button to trigger image upload -->
-    <button id="uploadButton">Upload Image</button>
-    <img id="myImage" alt="Image Display">
+    <h2>Histogram</h2>
+    <img id="histogramImage" alt="Histogram" width="500">
+
     <script>
-        // Function to convert a file to base64 using FileReader
-        function readFileAsBase64(file) {
-            return new Promise((resolve, reject) => {
+        let base64ImageData;
+
+        // Function to upload the image and send the request when the "Send Request" button is clicked
+        async function sendRequest() {
+            try {
+                const inputElement = document.getElementById('imageInput');
+                const file = inputElement.files[0];
+
+                if (!file) {
+                    console.error('Please upload an image first.');
+                    return;
+                }
+
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = (error) => reject(error);
-                reader.readAsDataURL(file);
-            });
-        }
-        // Event listener for upload button click
-        document.getElementById('uploadButton').addEventListener('click', async function() {
-            const fileInput = document.getElementById('imageUpload');   
-            // Check if a file is selected
-            if (fileInput.files.length > 0) {
-                const selectedFile = fileInput.files[0];
-                try
-                {
-                    // Convert the image to base64
-                    const base64Image = await readFileAsBase64(selectedFile);
-                    // Create a JSON payload with the base64 image data
-                    const jsonData = {
-                        image: base64Image ,
-                        filter:"detection"
-                    };
-                    // Send the image to the server using Fetch API with async/await
+                reader.onloadend = async function () {
+                    base64ImageData = reader.result.split(',')[1];
+                    console.log('Image uploaded:', base64ImageData);
+
+                    // Get the image data (base64) from the server
                     const response = await fetch('/upload', {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json',},
-                        body: JSON.stringify(jsonData)
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            image: base64ImageData,
+                            filter: 'perwitt',
+                        }),
                     });
-                    const data = await response.arrayBuffer();
-                    // Convert the ArrayBuffer to a Uint8Array
-                    const uint8Array = new Uint8Array(data);
-                    // Create a Blob from the Uint8Array
-                    const blob = new Blob([uint8Array], { type: 'image/png' });
-                    // Create a data URL from the Blob
-                    const imageUrl = URL.createObjectURL(blob);
-                    document.getElementById('myImage').src = imageUrl;
-                }
-                catch (error) {
-                    console.error('An error occurred:', error);
-                }
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log(data)
+                    // Update the image elements with the received data
+                    document.getElementById('originalImage').src = 'data:image/png;base64,' + base64ImageData
+                    document.getElementById('processedImage').src = 'data:image/png;base64,' + data.processed_image;
+                };
+
+                reader.readAsDataURL(file);
+            } catch (error) {
+                console.error('Error:', error);
             }
-            else
-                console.error('No image file selected.');
-        });
+        }
     </script>
 </body>
 </html>
