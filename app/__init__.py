@@ -63,6 +63,20 @@ def perwitt(img):
     edges_y = edges_y.astype(np.float64)
     edges = cv2.magnitude(edges_x, edges_y)
     return edges
+def laplacian_of_gaussian(img):
+    # Load an image
+    image = img
+
+    # Apply Gaussian blur
+    image_blurred = cv2.GaussianBlur(image, (5, 5), 0)
+
+    # Apply Laplacian of Gaussian
+    laplacian = cv2.Laplacian(image_blurred, cv2.CV_64F)
+
+    # Convert the result to uint8
+    laplacian = np.uint8(np.absolute(laplacian))
+
+    return laplacian
 
 
 def segment(img):
@@ -98,7 +112,7 @@ def detect_objects(img):
     for (x, y, w, h) in faces:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
     return img
-
+ 
 def histogram_equalization(img):
     # Convert the image to grayscale if it's not already
     if len(img.shape) == 3:
@@ -107,15 +121,16 @@ def histogram_equalization(img):
     # Apply histogram equalization
     equalized_img = cv2.equalizeHist(img)
 
-    return equalized_img
-filters = {
+    return equalized_img 
+filters = { 
     "canny": canny,
     "sobel": sobel,
     "segment": segment,
-    "detection": detect_objects, 
+    "face-detection": detect_objects, 
     "perwitt":perwitt,
-    "hist":histogram_equalization
-}
+    "hist":histogram_equalization,
+    "laplacian_of_gaussian":laplacian_of_gaussian
+} 
 
 
 @app.route("/")
@@ -134,18 +149,16 @@ def upload_image():
             filter_to_apply = filters.get(data["filter"])
             
             if filter_to_apply:
-                edited_img, hist = filter_to_apply(img)
+                edited_img = filter_to_apply(img)
                 img_bytes = process_for_upload(edited_img)
                 img_bytes = BytesIO(img_bytes)
-                 
-                # Encode the images and histogram as base64 strings
-                original_image_base64 = base64.b64encode(img_64.encode('utf-8')).decode('utf-8')
                 processed_image_base64 = base64.b64encode(img_bytes.getvalue()).decode('utf-8')
                 # Return the result as a JSON response
                 return jsonify({
                     "processed_image": processed_image_base64,
                 })
             else:
+                print("filter not found")
                 return jsonify({'error': 'Invalid filter name.'}), 400
         else:
             return jsonify({'error': 'Invalid request format. Please provide "image" and "filter" in the request.'}), 400

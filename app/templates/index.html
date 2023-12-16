@@ -8,21 +8,40 @@
 </head>
 <body>
     <input type="file" id="imageInput" accept="image/*">
-    <button onclick="sendRequest()">Send Request</button>
+    <label for="Filters">Choose a filter:</label>
+    <select id="filters" name="filters">
+        <option value="canny">Canny's edge detection</option>
+        <option value="sobel">Sobel's edge detection</option>
+        <option value="perwitt">perwitt's edge detection</option>
+        <option value="laplacian_of_gaussian">laplacian_of_gaussian</option>
+        <option value="segment">Segment using Kmeans</option>
+        <option value="face-detection">face-detection</option>
+        <option value="hist">Histogram equalziation</option>
+    </select>
+    <button onclick="sendRequest()">Apply filter</button>
 
     <h2>Original Image</h2>
-    <img id="originalImage" alt="Original Image" width="500">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png" id="originalImage" alt="Original Image" width="500">
     
     <h2>Processed Image</h2>
-    <img id="processedImage" alt="Processed Image" width="500">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png"id="processedImage" alt="Processed Image" width="500">
 
     <h2>Histogram</h2>
     <img id="histogramImage" alt="Histogram" width="500">
 
     <script>
         let base64ImageData;
-
-        // Function to upload the image and send the request when the "Send Request" button is clicked
+      // Get the drop-down element by its ID
+        function get_filter()
+        {
+        var dropdown = document.getElementById("filters");
+        // Get the selected option
+        var selectedOption = dropdown.options[dropdown.selectedIndex]; 
+        // Get the value of the selected option
+        var selectedValue = selectedOption.value;
+        console.log(selectedValue)
+        return selectedValue
+        }
         async function sendRequest() {
             try {
                 const inputElement = document.getElementById('imageInput');
@@ -46,7 +65,7 @@
                         },
                         body: JSON.stringify({
                             image: base64ImageData,
-                            filter: 'perwitt',
+                            filter: get_filter()
                         }),
                     });
 
