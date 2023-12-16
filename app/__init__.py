@@ -11,8 +11,6 @@ app = Flask(__name__)
 def log_request_info():
     app.logger.info('Request: %s %s', request.method, request.url)
     print(f"Request: {request.method} {request.url}")
-    print(f"Headers : {request.headers}")
-    print(f"body : {request.get_data()}")
     app.logger.debug('Headers: %s', request.headers)
     app.logger.debug('Body: %s', request.get_data())
 
