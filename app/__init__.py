@@ -143,14 +143,13 @@ filters = {
 @app.route("/")
 def home():
     '''renders template'''
-    log_request_info()
+    print("connected to server")
     return render_template("index.html")
 
  
 @app.route('/upload', methods=['POST'])
 def upload_image():
     try:
-        log_request_info()
         data = request.get_json()
         if 'image' in data and 'filter' in data:
             img_64 = data['image']
