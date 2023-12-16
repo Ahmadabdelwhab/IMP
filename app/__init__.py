@@ -7,7 +7,14 @@ import cv2
 import matplotlib.pyplot as plt
 
 app = Flask(__name__)
-
+@app.before_request
+def log_request_info():
+    app.logger.info('Request: %s %s', request.method, request.url)
+    print(f"Request: {request.method} {request.url}")
+    print(f"Headers : {request.headers}")
+    print(f"body : {request.get_data()}")
+    app.logger.debug('Headers: %s', request.headers)
+    app.logger.debug('Body: %s', request.get_data())
 
 def base64_to_img(img_64):
     '''convert image from numpy array to image png format'''
@@ -136,12 +143,14 @@ filters = {
 @app.route("/")
 def home():
     '''renders template'''
+    log_request_info()
     return render_template("index.html")
 
  
 @app.route('/upload', methods=['POST'])
 def upload_image():
     try:
+        log_request_info()
         data = request.get_json()
         if 'image' in data and 'filter' in data:
             img_64 = data['image']
@@ -154,6 +163,7 @@ def upload_image():
                 img_bytes = BytesIO(img_bytes)
                 processed_image_base64 = base64.b64encode(img_bytes.getvalue()).decode('utf-8')
                 # Return the result as a JSON response
+                print("image served")
                 return jsonify({
                     "processed_image": processed_image_base64,
                 })
