@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, render_template, send_file
 import cv2
 import matplotlib.pyplot as plt
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 @app.before_request
 def log_request_info():
     app.logger.info('Request: %s %s', request.method, request.url)
@@ -24,7 +24,7 @@ def base64_to_img(img_64):
     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
     return image
 
-
+ 
 def process_for_upload(edited_img):
     '''convert images to bytes to send later'''
     _, buffer = cv2.imencode('.png', edited_img)

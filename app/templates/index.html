@@ -5,27 +5,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image processing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <input type="file" id="imageInput" accept="image/*">
-    <label for="Filters">Choose a filter:</label>
-    <select id="filters" name="filters">
-        <option value="canny">Canny's edge detection</option>
-        <option value="sobel">Sobel's edge detection</option>
-        <option value="perwitt">perwitt's edge detection</option>
-        <option value="laplacian_of_gaussian">laplacian_of_gaussian</option>
-        <option value="segment">Segment using Kmeans</option>
-        <option value="face-detection">face-detection</option>
-        <option value="hist">Histogram equalziation</option>
-    </select>
-    <button onclick="sendRequest()">Apply filter</button>
-
-    <h2>Original Image</h2>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png" id="originalImage" alt="Original Image" width="500">
+    <div class="container">
+        <div class="inputsContainer">
+            <div>
+                <h1>Image processing</h1>
+                <label for="imageInput" class="chooseFile">Upload Image</label>
+                <input type="file" id="imageInput" accept="image/*">
+                <label style="font-size: 20px;" for="Filters">Choose a filter:</label>
+                <select id="filters" name="filters">
+                    <option value="canny">Canny's edge detection</option>
+                    <option value="sobel">Sobel's edge detection</option>
+                    <option value="perwitt">perwitt's edge detection</option>
+                    <option value="laplacian_of_gaussian">laplacian_of_gaussian</option>
+                    <option value="segment">Segment using Kmeans</option>
+                    <option value="face-detection">face-detection</option>
+                    <option value="hist">Histogram equalziation</option>
+                </select>
+                <button onclick="sendRequest()">Apply filter</button>
+            </div>
+        </div>
     
-    <h2>Processed Image</h2>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png"id="processedImage" alt="Processed Image" width="500">
-
+        <div class="imgsContainer">
+            <div>
+                <h2>Original Image</h2>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png" id="originalImage" alt="Original Image" width="500">
+            </div>
+            
+            <div>
+                <h2>Filtered Image</h2>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png"id="processedImage" alt="Processed Image" width="500">
+            </div>
+        </div>
+    </div>
 
     <script>
         let base64ImageData;
@@ -54,6 +68,8 @@
                 reader.onloadend = async function () {
                     base64ImageData = reader.result.split(',')[1];
                     console.log('Image uploaded:', base64ImageData);
+                    document.getElementById('originalImage').src = 'data:image/png;base64,' + base64ImageData;
+                    document.getElementById('processedImage').src = "{{ url_for('static', filename='loading.gif') }}";
 
                     // Get the image data (base64) from the server
                     const response = await fetch('/upload', {
@@ -74,7 +90,6 @@
                     const data = await response.json();
                     console.log(data)
                     // Update the image elements with the received data
-                    document.getElementById('originalImage').src = 'data:image/png;base64,' + base64ImageData
                     document.getElementById('processedImage').src = 'data:image/png;base64,' + data.processed_image;
                 };
 
